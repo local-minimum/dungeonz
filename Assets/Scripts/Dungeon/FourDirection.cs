@@ -14,9 +14,15 @@ public static class FourDirectionExtensions {
         FourDirection.West,
     };
 
-    public static Vector2Int RotateVector(this FourDirection direction, Vector2Int vector)
+    /// <summary>
+    /// Rotate vector according to which direction is "up"
+    /// </summary>
+    /// <param name="upDirection">Which direction up is facing</param>
+    /// <param name="vector">The vector when up faces north</param>
+    /// <returns></returns>
+    public static Vector2Int RotateVector(this FourDirection upDirection, Vector2Int vector)
     {
-        switch (direction)
+        switch (upDirection)
         {
             case FourDirection.North:
                 return vector;
@@ -27,7 +33,7 @@ public static class FourDirectionExtensions {
             case FourDirection.West:
                 return new Vector2Int(-vector.y, vector.x);
             default:
-                throw new System.ArgumentException($"{direction} is not a real direction");
+                throw new System.ArgumentException($"{upDirection} is not a real direction");
         }
     }
 

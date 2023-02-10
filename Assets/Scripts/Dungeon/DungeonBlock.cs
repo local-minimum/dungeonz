@@ -20,18 +20,9 @@ public class DungeonBlock
     [Tooltip("North is 'normal' rotation. East is rotated 90 degrees clock-wise...")]
     public FourDirection Orientation;
 
-
-    private static Vector2Int ShapeFromData(int[,] data)
-    {
-        var height = data.GetLength(0);
-        var width = data.GetLength(1);
-
-        return new Vector2Int(width, height);        
-    }
-
     public DungeonBlock(int[,] data)
     {
-        Shape = ShapeFromData(data);
+        Shape = data.Shape();
         Pivot = new Vector2Int(Mathf.FloorToInt(Shape.x / 2f), Mathf.FloorToInt(Shape.y / 2f));
         Anchor = Vector2Int.zero;
         Orientation = FourDirection.North;
@@ -44,7 +35,7 @@ public class DungeonBlock
 
     public void UpdateData(int[,] data)
     {        
-        var shape = ShapeFromData(data);
+        var shape = data.Shape();
         if (shape != Shape)
         {
             throw new System.ArgumentException(
@@ -53,9 +44,6 @@ public class DungeonBlock
         }
         _data = data;
     }
-
-    // TODO: Seems oddly offset
-
 
     /// <summary>
     /// Transpose a block coordinates pair into a dungeon coordinates pair

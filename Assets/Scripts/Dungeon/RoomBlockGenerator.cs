@@ -27,13 +27,13 @@ public class RoomBlockGenerator
 
     bool RoomFill(int[,] data, Vector2Int shape, int value, bool connectPrevious)
     {
-        Vector2Int offset = blockShape.RandomShapeOffset(shape);
-        if (connectPrevious && !data.HasNonZero(new RectInt(offset, shape)))
+        Vector2Int offset = blockShape.RandomInsetAnchor(shape);
+        if (connectPrevious && !data.HasMatch(new RectInt(offset, shape)))
         {
-            var fillCount = data.CountNonZero();
+            var fillCount = data.CountMatches();
             if (fillCount > 0)
             {
-                var anchor = data.GetNthFilled(Random.Range(0, fillCount));
+                var anchor = data.GetNth(Random.Range(0, fillCount));
                 offset = anchor.ClampInside(blockShape, shape);
             } else
             {
@@ -66,8 +66,8 @@ public class RoomBlockGenerator
             actualShapes += RoomFill(data, RandomShape, 1, i > 0) ? 1 : 0;
         }
 
-
         // TODO: Add doors
+
         return new DungeonBlock(data);
     }
 }
