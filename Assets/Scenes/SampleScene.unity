@@ -243,6 +243,7 @@ MonoBehaviour:
     minBaseShape: {x: 3, y: 3}
     maxBaseShape: {x: 5, y: 5}
   fillScale: 0.95
+  rotationTickDuration: 0.25
 --- !u!4 &1954189876
 Transform:
   m_ObjectHideFlags: 0

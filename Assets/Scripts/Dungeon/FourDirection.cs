@@ -73,7 +73,7 @@ public static class FourDirections {
     public static FourDirection RotateCW(this FourDirection direction, int steps = 1)
     {
         int pos = directions.IndexOf(direction) + steps;
-        return directions[pos.Mod(steps)];
+        return directions[pos.Mod(directions.Count)];
     }
 
     /// <summary>

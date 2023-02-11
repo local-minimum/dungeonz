@@ -44,6 +44,25 @@ public class DungeonBlock
         _data = data;
     }
 
+    public Vector2Int DungeonShape
+    {
+        get
+        {
+            switch (Orientation)
+            {
+                case FourDirection.North:
+                case FourDirection.South:
+                    return Shape;
+                case FourDirection.West:
+                case FourDirection.East:
+                    var s = Shape;
+                    return new Vector2Int(s.y, s.x);
+                default:
+                    throw new System.ArgumentException($"{Orientation} is not a known orientation");
+            }
+        }
+    }
+
     /// <summary>
     /// Transpose a block coordinates pair into a dungeon coordinates pair
     /// </summary>
