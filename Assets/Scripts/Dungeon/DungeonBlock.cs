@@ -26,8 +26,7 @@ public class DungeonBlock
         Pivot = new Vector2Int(Mathf.FloorToInt(Shape.x / 2f), Mathf.FloorToInt(Shape.y / 2f));
         Anchor = Vector2Int.zero;
         Orientation = FourDirection.North;
-        _data = data;
-        Debug.Log(this);
+        _data = data;        
     }
 
     public override string ToString() => $"<Block {Shape} @ {Anchor} facing {Orientation} (pivot {Pivot})>";
@@ -82,7 +81,7 @@ public class DungeonBlock
     }
 
     /// <summary>
-    /// Get all non-zero positions as dungeon coordinates
+    /// Get all filled positions as dungeon coordinates
     /// </summary>
     /// <returns>Enumerable of coordinates and their values</returns>
     public IEnumerable<KeyValuePair<Vector2Int, int>> FilledDungeonPositions()
@@ -92,7 +91,7 @@ public class DungeonBlock
             for (int x = 0; x<Shape.x; x++)
             {
                 int value = _data[y, x];
-                if (value != 0)
+                if (value != (int)BlockTileTypes.Nothing)
                 {
                     yield return new KeyValuePair<Vector2Int, int>(
                         BlockCoordinatesToDungeon(new Vector2Int(x, y)),

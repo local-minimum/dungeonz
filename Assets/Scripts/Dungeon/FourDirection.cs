@@ -1,11 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum FourDirection { North, East, South, West };
 
-public static class FourDirectionExtensions {
-
-
+public static class FourDirections {
     private static readonly List<FourDirection> directions = new List<FourDirection>
     {
         FourDirection.North,
@@ -13,6 +12,34 @@ public static class FourDirectionExtensions {
         FourDirection.South,
         FourDirection.West,
     };
+
+    /// <summary>
+    /// Convert direction to a unit vector
+    /// </summary>
+    /// <param name="direction">The direction</param>
+    /// <returns>Unit int vector</returns>
+    public static Vector2Int AsVector(this FourDirection direction)
+    {
+        switch (direction)
+        {
+            case FourDirection.North:
+                return Vector2Int.up;
+            case FourDirection.West:
+                return Vector2Int.left;
+            case FourDirection.South:
+                return Vector2Int.down;
+            case FourDirection.East:
+                return Vector2Int.right;
+            default:
+                throw new System.ArgumentException($"{direction} is not a real direction");
+        }
+    }
+
+    /// <summary>
+    /// Get all cardinal directions
+    /// </summary>
+    /// <returns>Enumerable of unit vectors</returns>
+    public static IEnumerable<Vector2Int> AsDirections() => directions.Select(d => d.AsVector());
 
     /// <summary>
     /// Rotate vector according to which direction is "up"

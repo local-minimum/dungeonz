@@ -16,6 +16,12 @@ public static class MathHelpers
     }
 
     #region Vector2Int
+    /// <summary>
+    /// Taxicab distance
+    /// </summary>
+    /// <param name="vector">Vector to measure</param>
+    /// <returns>The distance</returns>
+    public static int ManhattanDistance(this Vector2Int vector) => Mathf.Abs(vector.x) + Mathf.Abs(vector.y);
 
     /// <summary>
     /// Random anchor for inset such that inset fits inside container
@@ -65,6 +71,9 @@ public static class MathHelpers
 
         return new Vector2Int(x, y);
     }
+
+    public static bool IsUnit(this Vector2Int vector) => vector.y == 0 && Mathf.Abs(vector.x) == 1 && vector.x == 0 || Mathf.Abs(vector.y) == 1;
+    
 
     #endregion
 
@@ -130,13 +139,11 @@ public static class MathHelpers
             predicate = NotZero;
         }
 
-        // TODO: This one is suspicious... does it not work?
-        Debug.LogWarning("There might be something wrong with this");
         for (int y = rect.yMin; y < rect.yMax; y++)
         {
-            for (int x = rect.xMax; x < rect.xMax; x++)
+            for (int x = rect.xMin; x < rect.xMax; x++)
             {
-                if (data[y, x] != 0) return true;
+                if (predicate(data[y, x])) return true;
             }
         }
         return false;
@@ -180,5 +187,33 @@ public static class MathHelpers
         throw new System.ArgumentException("Did not find such position");
     }
 
-    #endregion
+    /// <summary>
+    /// Get all coordinates matching the predicate
+    /// </summary>
+    /// <param name="data">Data to search (rows, then columns)</param>
+    /// <param name="predicate">Predicate to match, defaults to non-zero</param>
+    /// <returns></returns>
+    public static IEnumerable<Vector2Int> GetAll(
+        this int[,] data,
+        System.Func<int, bool> predicate = null
+    )
+    {
+        if (predicate == null)
+        {
+            predicate = NotZero;
+        }
+
+        for (int y = 0, maxY = data.GetLength(0); y < maxY; y++)
+        {
+            for (int x = 0, maxX = data.GetLength(1); x < maxX; x++)
+            {
+                if (predicate(data[y, x]))
+                {
+                    yield return new Vector2Int(x, y);
+                }
+            }
+        }
+    }
+
+#endregion
 }

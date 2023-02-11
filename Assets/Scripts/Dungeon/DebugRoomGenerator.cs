@@ -20,13 +20,13 @@ public class DebugRoomGenerator : MonoBehaviour
 
     }
 
-    static Color ValueToColor(int value)
+    static Color ValueToColor(BlockTileTypes value)
     {
         switch (value)
         {
-            case 1:
+            case BlockTileTypes.Room:
                 return Color.cyan;
-            case 2:
+            case BlockTileTypes.Door:
                 return Color.magenta;
             default:
                 return Color.gray;
@@ -36,9 +36,13 @@ public class DebugRoomGenerator : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (block == null) return;
+        Vector3 origin = transform.position;
+
+        Gizmos.color = ValueToColor(BlockTileTypes.Nothing);
+        var blockShape = block.Shape;
+        Gizmos.DrawCube(origin, new Vector3(blockShape.x, blockShape.y));
 
         var positions = block.FilledDungeonPositions().ToArray();
-        Vector3 origin = transform.position;
         Vector3 shape = new Vector3(1, 1, 0) * fillScale;
         Vector3 scaleOffset = (new Vector3(1, 1, 0) - shape) * 0.5f;
 
@@ -48,7 +52,7 @@ public class DebugRoomGenerator : MonoBehaviour
 
             Vector3 pos = new Vector3(origin.x + position.Key.x, origin.y + position.Key.y, origin.z) + scaleOffset;
 
-            Gizmos.color = ValueToColor(position.Value);
+            Gizmos.color = ValueToColor((BlockTileTypes) position.Value);
 
             Gizmos.DrawCube(pos, shape);
         }

@@ -240,8 +240,9 @@ MonoBehaviour:
     blockShape: {x: 7, y: 7}
     doorsPossibilities: 010000000100000001000000010000000200000002000000020000000300000004000000
     numberOfBaseShapePossibilities: 01000000010000000200000002000000030000000400000005000000
-    minBaseShape: {x: 2, y: 2}
+    minBaseShape: {x: 3, y: 3}
     maxBaseShape: {x: 5, y: 5}
+  fillScale: 0.95
 --- !u!4 &1954189876
 Transform:
   m_ObjectHideFlags: 0
