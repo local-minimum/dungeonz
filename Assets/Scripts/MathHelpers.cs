@@ -78,7 +78,9 @@ public static class MathHelpers
     /// </summary>
     /// <param name="vector">The vector</param>
     /// <returns>If is unit vector</returns>
-    public static bool IsUnit(this Vector2Int vector) => vector.y == 0 && Mathf.Abs(vector.x) == 1 && vector.x == 0 || Mathf.Abs(vector.y) == 1;
+    public static bool IsUnit(this Vector2Int vector) => 
+        vector.y == 0 && Mathf.Abs(vector.x) == 1 
+        || vector.x == 0 && Mathf.Abs(vector.y) == 1;
     
     /// <summary>
     /// Returns all coordinates of a shape that are included in the rings
