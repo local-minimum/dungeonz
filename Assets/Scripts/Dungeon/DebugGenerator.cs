@@ -56,20 +56,33 @@ public class DebugGenerator : MonoBehaviour
 
     }
 
-    static Color ValueToColor(BlockTileTypes value)
+    [SerializeField]
+    Color32 colorHall;
+    [SerializeField]
+    Color32 colorRoom;
+    [SerializeField]
+    Color32 colorDoor;
+    [SerializeField]
+    Color32 colorHallExit;
+    [SerializeField]
+    Color32 tileBackground;
+
+    Color ValueToColor(BlockTileTypes value)
     {
         switch (value)
         {
             case BlockTileTypes.Hall:
+                return colorHall;
             case BlockTileTypes.Room:
-                return Color.cyan;
+                return colorRoom;
             case BlockTileTypes.Exit:
+                return colorHallExit;
             case BlockTileTypes.Door:
-                return Color.magenta;
+                return colorDoor;
             case BlockTileTypes.FalseHall:
                 return Color.yellow;
             default:
-                return Color.gray;
+                return tileBackground;
         }
     }
 

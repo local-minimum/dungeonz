@@ -252,9 +252,24 @@ MonoBehaviour:
     digElseTurnTowardsProbability: 0.9
     digInitialDirectionProbability: 0.8
     erosionThreshold: 3
-  blockType: 1
+  blockType: 2
   fillScale: 0.95
   rotationTickDuration: 1
+  colorHall:
+    serializedVersion: 2
+    rgba: 4282338667
+  colorRoom:
+    serializedVersion: 2
+    rgba: 4284832856
+  colorDoor:
+    serializedVersion: 2
+    rgba: 4279055239
+  colorHallExit:
+    serializedVersion: 2
+    rgba: 4284445857
+  tileBackground:
+    serializedVersion: 2
+    rgba: 2785017856
 --- !u!4 &1954189876
 Transform:
   m_ObjectHideFlags: 0
