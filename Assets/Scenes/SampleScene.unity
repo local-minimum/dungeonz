@@ -236,12 +236,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0428bc495ebb5e4ba0b73f680629b95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  generator:
+  roomGenerator:
     blockShape: {x: 7, y: 7}
-    doorsPossibilities: 010000000100000001000000010000000200000002000000020000000300000004000000
-    numberOfBaseShapePossibilities: 01000000010000000200000002000000030000000400000005000000
+    doorsOptions: 010000000100000001000000010000000200000002000000020000000300000004000000
+    numberOfBaseShapeOptions: 01000000010000000200000002000000030000000400000005000000
     minBaseShape: {x: 3, y: 3}
     maxBaseShape: {x: 5, y: 5}
+    closestDoorProximity: 2
+  hallGenerator:
+    blockShape: {x: 7, y: 7}
+    exitOptions: 010000000200000002000000020000000200000003000000030000000300000004000000
+    exitRings: 2
+    closestExitProximity: 5
+  blockType: 2
   fillScale: 0.95
   rotationTickDuration: 0.25
 --- !u!4 &1954189876

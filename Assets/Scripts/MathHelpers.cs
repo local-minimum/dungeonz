@@ -16,6 +16,7 @@ public static class MathHelpers
     }
 
     #region Vector2Int
+
     /// <summary>
     /// Taxicab distance
     /// </summary>
@@ -72,8 +73,33 @@ public static class MathHelpers
         return new Vector2Int(x, y);
     }
 
+    /// <summary>
+    /// If the length of the vector is exactly 1.
+    /// </summary>
+    /// <param name="vector">The vector</param>
+    /// <returns>If is unit vector</returns>
     public static bool IsUnit(this Vector2Int vector) => vector.y == 0 && Mathf.Abs(vector.x) == 1 && vector.x == 0 || Mathf.Abs(vector.y) == 1;
     
+    /// <summary>
+    /// Returns all coordinates of a shape that are included in the rings
+    /// </summary>
+    /// <param name="shape">The container shape</param>
+    /// <param name="rings">The number of rings to include</param>
+    /// <returns></returns>
+    public static IEnumerable<Vector2Int> GetOuterRingCoordinates(this Vector2Int shape, int rings = 1)
+    {
+        for (int y = 0; y < shape.y; y++)
+        {
+            bool includeRow = y < rings || shape.y - y <= rings;
+            for (int x = 0; x < shape.x; x++)
+            {
+                if (includeRow || x < rings || shape.x - x <= rings)
+                {
+                    yield return new Vector2Int(x, y);
+                }
+            }
+        }
+    }
 
     #endregion
 

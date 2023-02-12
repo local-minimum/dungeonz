@@ -2,16 +2,36 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+public enum BlockType { Room = 1, Hall = 2 };
 
-public class DebugRoomGenerator : MonoBehaviour
+public class DebugGenerator : MonoBehaviour
 {
-    [SerializeField] RoomBlockGenerator generator;
+    [SerializeField] RoomBlockGenerator roomGenerator;
+    [SerializeField] HallBlockGenerator hallGenerator;
+
+    [SerializeField] BlockType blockType = BlockType.Hall;
+
     [SerializeField, Range(0, 1)] float fillScale = 0.95f;
     [SerializeField, Range(0, 1)] float rotationTickDuration = 1;
 
     DungeonBlock block;
 
     float lastRotation = -1;
+
+    private IBlockGenerator generator {
+        get {  
+        
+            switch (blockType)
+            {
+                case BlockType.Room:
+                    return roomGenerator;
+                case BlockType.Hall:
+                    return hallGenerator;
+                default:
+                    throw new System.ArgumentException($"Unknown block type {blockType}");
+            }
+        }
+    }
 
     private void Update()
     {
@@ -40,8 +60,10 @@ public class DebugRoomGenerator : MonoBehaviour
     {
         switch (value)
         {
+            case BlockTileTypes.Hall:
             case BlockTileTypes.Room:
                 return Color.cyan;
+            case BlockTileTypes.Exit:
             case BlockTileTypes.Door:
                 return Color.magenta;
             default:

@@ -3,16 +3,16 @@ using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class RoomBlockGenerator
+public class RoomBlockGenerator : IBlockGenerator
 {
     [SerializeField]
-    Vector2Int blockShape = new Vector2Int(7, 7);
+    Vector2Int blockShape = new Vector2Int(9, 9);
 
     [SerializeField, Tooltip("Randomly selects an option, repeating an option makes it more probable")]
-    private int[] doorsPossibilities = new int[] { 1, 1, 1, 1, 2, 2, 2, 3, 4 };
+    private int[] doorsOptions = new int[] { 1, 1, 1, 1, 2, 2, 2, 3, 4 };
 
     [SerializeField, Tooltip("Randomly selects an option, repeating an option makes it more probable")]
-    private int[] numberOfBaseShapePossibilities = new int[] { 1, 1, 2, 2, 3, 4, 5 };
+    private int[] numberOfBaseShapeOptions = new int[] { 1, 1, 2, 2, 2, 3, 3, 4, 5, 6 };
 
     [SerializeField]
     Vector2Int minBaseShape = new Vector2Int(3, 3);
@@ -20,12 +20,15 @@ public class RoomBlockGenerator
     [SerializeField]
     Vector2Int maxBaseShape = new Vector2Int(5, 5);
 
+    [SerializeField]
+    int closestDoorProximity = 2;
+
     Vector2Int RandomShape => new Vector2Int(
         Random.Range(minBaseShape.x, maxBaseShape.x),
         Random.Range(minBaseShape.y, maxBaseShape.y)
     );
 
-    bool RoomFill(int[,] data, Vector2Int shape, int value, bool connectPrevious)
+    private bool RoomFill(int[,] data, Vector2Int shape, int value, bool connectPrevious)
     {
         Vector2Int offset = blockShape.RandomInsetAnchor(shape);
         if (connectPrevious && !data.HasMatch(new RectInt(offset, shape)))
@@ -107,31 +110,23 @@ public class RoomBlockGenerator
                 return new KeyValuePair<Vector2Int, int>(coords, value);
             })
             .First(kvp => kvp.Value == (int)BlockTileTypes.Nothing)
-            .Key;            
-    
+            .Key;                   
 
-    public DungeonBlock Generate()
+    private void AddDoors(int[,] data)
     {
-        var data = new int[blockShape.y, blockShape.x];
-        var nShapes = numberOfBaseShapePossibilities[Random.Range(0, numberOfBaseShapePossibilities.Length)];
-        var nDoors = doorsPossibilities[Random.Range(0, doorsPossibilities.Length)];
-
-        int actualShapes = 0;
-
-        for (int i = 0; i<nShapes; i++)
-        {
-            actualShapes += RoomFill(data, RandomShape, (int) BlockTileTypes.Room, i > 0) ? 1 : 0;
-        }
+        var nDoors = doorsOptions[Random.Range(0, doorsOptions.Length)];
 
         var doors = new List<Vector2Int>();
         var doorCandidates = PossibleDoorAnchors(data);
 
-        for (int i = 0; i<nDoors; i++)
+        for (int i = 0; i < nDoors; i++)
         {
             var doorAnchor = doorCandidates[Random.Range(0, doorCandidates.Count)];
             var door = DoorFromAnchor(data, doorAnchor);
 
-            doorCandidates = doorCandidates.Where(c => (c - door).ManhattanDistance() > 2).ToList();
+            doorCandidates = doorCandidates
+                .Where(c => (c - door).ManhattanDistance() > closestDoorProximity)
+                .ToList();
 
             data[door.y, door.x] = (int)BlockTileTypes.Door;
             doors.Add(door);
@@ -141,6 +136,21 @@ public class RoomBlockGenerator
                 i = nDoors;
             }
         }
+    }
+
+    public DungeonBlock Generate()
+    {
+        var data = new int[blockShape.y, blockShape.x];
+        var nShapes = numberOfBaseShapeOptions[Random.Range(0, numberOfBaseShapeOptions.Length)];
+
+        int actualShapes = 0;
+
+        for (int i = 0; i<nShapes; i++)
+        {
+            actualShapes += RoomFill(data, RandomShape, (int) BlockTileTypes.Room, i > 0) ? 1 : 0;
+        }
+
+        AddDoors(data);
 
         return new DungeonBlock(data);
     }
