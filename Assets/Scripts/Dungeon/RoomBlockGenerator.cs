@@ -9,7 +9,7 @@ public class RoomBlockGenerator : IBlockGenerator
     Vector2Int blockShape = new Vector2Int(9, 9);
 
     [SerializeField, Tooltip("Randomly selects an option, repeating an option makes it more probable")]
-    private int[] doorsOptions = new int[] { 1, 1, 1, 1, 2, 2, 2, 3, 4 };
+    private int[] doorsOptions = new int[] { 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3 };
 
     [SerializeField, Tooltip("Randomly selects an option, repeating an option makes it more probable")]
     private int[] numberOfBaseShapeOptions = new int[] { 1, 1, 2, 2, 2, 3, 3, 4, 5, 6 };

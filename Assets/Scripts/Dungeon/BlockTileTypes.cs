@@ -5,4 +5,5 @@
     Door = 2, // Room connector
     Hall = 3,
     Exit = 4, // Hallway connector
+    FalseHall = 5,
 }

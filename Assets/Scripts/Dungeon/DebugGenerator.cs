@@ -66,6 +66,8 @@ public class DebugGenerator : MonoBehaviour
             case BlockTileTypes.Exit:
             case BlockTileTypes.Door:
                 return Color.magenta;
+            case BlockTileTypes.FalseHall:
+                return Color.yellow;
             default:
                 return Color.gray;
         }

@@ -238,7 +238,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   roomGenerator:
     blockShape: {x: 9, y: 9}
-    doorsOptions: 010000000100000001000000010000000200000002000000020000000300000004000000
+    doorsOptions: 010000000100000001000000010000000100000001000000010000000200000002000000020000000200000003000000
     numberOfBaseShapeOptions: 01000000010000000200000002000000020000000300000003000000040000000500000006000000
     minBaseShape: {x: 3, y: 3}
     maxBaseShape: {x: 5, y: 5}
@@ -248,7 +248,11 @@ MonoBehaviour:
     exitOptions: 010000000200000002000000030000000300000003000000030000000300000004000000
     exitRings: 2
     closestExitProximity: 7
-  blockType: 2
+    digStraightProbability: 0.7
+    digElseTurnTowardsProbability: 0.9
+    digInitialDirectionProbability: 0.8
+    erosionThreshold: 3
+  blockType: 1
   fillScale: 0.95
   rotationTickDuration: 1
 --- !u!4 &1954189876

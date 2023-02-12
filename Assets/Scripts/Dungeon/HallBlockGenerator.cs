@@ -65,6 +65,50 @@ public class HallBlockGenerator : IBlockGenerator
         return false;
     }
 
+    [SerializeField, Range(0, 1)]
+    float digStraightProbability = 0.7f;
+
+    [SerializeField, Range(0, 1)]
+    float digElseTurnTowardsProbability = 0.9f;
+
+    [SerializeField, Range(0, 1)]
+    float digInitialDirectionProbability = 0.8f;
+
+    Vector2Int SelectNextDigDirection(
+        Vector2Int position, 
+        Vector2Int target,
+        Vector2Int direction, 
+        List<Vector2Int> candidates,         
+        out Vector2Int next
+    )
+    {
+        if (direction == Vector2Int.zero)
+        {
+            next = candidates
+                .OrderBy(c => (target - c).ManhattanDistance())
+                .Where((_, idx) => idx == candidates.Count - 1 || Random.value < digInitialDirectionProbability)
+                .First(); ;
+            return (next - position);
+        }
+
+        var straight = candidates.Where(c => (c - position) == direction).ToArray();
+        if (straight.Length > 0 && Random.value < digStraightProbability)
+        {
+            next = straight[0];
+            return direction;
+        }
+
+        var turns = candidates.OrderBy(c => (target - c).ManhattanDistance()).ToArray();
+        if (turns.Length > 1 && Random.value > digElseTurnTowardsProbability)
+        {
+            next = turns[1];
+            return (next - position);
+        }
+
+        next = turns[0];
+        return (next - position);
+    }
+
     List<Vector2Int> Connect(
         int[,] data,
         Vector2Int source,
@@ -77,6 +121,8 @@ public class HallBlockGenerator : IBlockGenerator
     {
         halls = new List<Vector2Int>();
         var position = source;
+        var direction = Vector2Int.zero;
+
         while (true)
         {
             if ((position - target).IsUnit())
@@ -91,7 +137,7 @@ public class HallBlockGenerator : IBlockGenerator
 
                 Debug.Log($"Wanted to connect {source} with {target} but stumbled upon {accidentalTarget} from {position}");
 
-                diggable = diggable.Where(c => !(accidentalTarget - c).IsUnit()).ToList();
+                diggable = diggable.Where(c => (accidentalTarget - c).ChebyshevDistance() > 1).ToList();
                 success = false;
                 return diggable;
             }
@@ -106,29 +152,20 @@ public class HallBlockGenerator : IBlockGenerator
                 return diggable;
             }
 
-            var next = candidates[Random.Range(0, candidates.Count)];
-            if (data[position.y, position.x] == (int)BlockTileTypes.Exit)
-            {
-                // Current position is an exit, remove all remaining diggables around it
-                // needed to clear options around the source
-                diggable = diggable.Where(c => !(c - position).IsUnit()).ToList();
-            }
-            else
+            direction = SelectNextDigDirection(position, target, direction, candidates, out Vector2Int next);
+            if (data[position.y, position.x] != (int)BlockTileTypes.Exit)
             {
                 // Remove next position since we'll dig it out now
                 diggable = diggable.Where(c => c != next).ToList();
             }            
+            if (position == source)
+            {
+                diggable = diggable.Where(c => (c - source).ManhattanDistance() > 1).ToList();
+            }
 
             if (next == target)
             {
                 // If we are attempting to dig out our target next (we should never need to)
-
-                if (data[target.y, target.x] == (int)BlockTileTypes.Exit)
-                {
-                    // This shouldn't happen but lets clear out options around the target if
-                    // it was an exit
-                    diggable = diggable.Where(c => !(c - position).IsUnit()).ToList();
-                }
                 success = true;
                 return diggable;
             } else
@@ -167,12 +204,14 @@ public class HallBlockGenerator : IBlockGenerator
         {
             var digSource = exits[Random.Range(0, exits.Count)];
             exits = exits.Where(e => e != digSource).ToList();
-
-            Vector2Int digTarget;
-            if (GetDigTarget(digSource, exits, halls, data, out digTarget))
+            
+            bool targetIsExit = GetDigTarget(digSource, exits, halls, data, out Vector2Int digTarget);
+            if (targetIsExit)
             {
                 exits = exits.Where(e => e != digTarget).ToList();
             }
+
+            Debug.Log($"Connect {digSource} with {digTarget} (exit:{targetIsExit})");
 
             List<Vector2Int> newHalls;
             diggable = Connect(
@@ -184,6 +223,9 @@ public class HallBlockGenerator : IBlockGenerator
                 out newHalls, 
                 out bool success
             );
+            diggable = diggable
+                .Where(c => (c - digSource).ChebyshevDistance() > 1 && (!targetIsExit || !success || (c - digTarget).ChebyshevDistance() > 1))
+                .ToList();
 
             halls.AddRange(newHalls);
 
@@ -201,12 +243,114 @@ public class HallBlockGenerator : IBlockGenerator
         
     }
 
+    private struct Neighbourhood
+    {
+        public Vector2Int Position;
+        public int Neighbours;
+        public bool NextToExit;
+
+        public Neighbourhood(Vector2Int position, int neighbours, bool nextToExit)
+        {
+            Position = position;
+            Neighbours = neighbours;
+            NextToExit = nextToExit;
+        }
+
+        public bool IsSame(Neighbourhood other) => other.Position == Position;
+
+        public int Discount(Neighbourhood other)
+        {
+            if ((other.Position - Position).ChebyshevDistance() == 1)
+            {
+                Neighbours--;
+            }
+            return Neighbours;
+        }
+    }
+    
+    int CountSeparateHalls(IEnumerable<Vector2Int> halls)
+    {
+        int count = 0;
+
+        List<Vector2Int> unTouchedHalls = new List<Vector2Int>();
+        List<Vector2Int> sources = new List<Vector2Int>();
+
+        unTouchedHalls.AddRange(halls);
+
+        if (unTouchedHalls.Count == 0) return 0;
+
+        sources.Add(unTouchedHalls[0]);
+        unTouchedHalls.Remove(sources[0]);
+
+        while(unTouchedHalls.Count > 0)
+        {
+            while (sources.Count > 0)
+            {
+                var source = sources[0];
+                sources.RemoveAt(0);
+
+                var neighbours = unTouchedHalls.Where(h => (h - source).ManhattanDistance() == 1).ToList();
+
+                unTouchedHalls.RemoveAll(h => neighbours.Contains(h));
+                sources.AddRange(neighbours);
+            }
+
+            if (unTouchedHalls.Count == 0) break;
+
+            sources.Add(unTouchedHalls[0]);
+            unTouchedHalls.Remove(sources[0]);
+
+            count++;
+        }
+
+        return count;
+    }
+
+    [SerializeField, Range(3, 5)]
+    int erosionThreshold = 3;
+
+    void ErodeHalls(int[,] data)
+    {
+        var halls = data.GetAll(v => v == (int)BlockTileTypes.Hall).ToList();
+        int nSeparateHalls = CountSeparateHalls(halls);
+
+        var candidates = halls
+            .Select(current =>
+        {
+            int neighbours = halls.Count(c => (c - current).ChebyshevDistance() == 1);
+            bool nextToExit = halls.Any(c => data[c.y, c.x] == (int)BlockTileTypes.Exit);
+            return new Neighbourhood(current, neighbours, nextToExit);
+        })
+            .Where(n => n.Neighbours > erosionThreshold && !n.NextToExit)
+            .OrderBy(n => n.Neighbours)
+            .ToList();
+
+        while (candidates.Count > 0)
+        {
+            var maxNeighbours = candidates.Max(c => c.Neighbours);
+            var options = candidates.Where(c => c.Neighbours == maxNeighbours).ToList();
+            var candidate = options[Random.Range(0, options.Count)];
+
+            if (nSeparateHalls == CountSeparateHalls(halls.Where(h => h != candidate.Position))) {
+                // data[candidate.Position.y, candidate.Position.x] = (int)BlockTileTypes.FalseHall;
+                data[candidate.Position.y, candidate.Position.x] = (int)BlockTileTypes.Nothing;
+                halls.Remove(candidate.Position);
+            }
+
+            candidates = candidates
+                .Where(c => !c.IsSame(candidate))
+                .Where(c => c.Discount(candidate) > erosionThreshold)
+                .ToList();
+        }
+    }
+
     public DungeonBlock Generate()
     {
         var data = new int[blockShape.y, blockShape.x];
 
         var exits = AddExits(data);
         DigHalls(data, exits);
+        ErodeHalls(data);
 
         return new DungeonBlock(data);
     }

@@ -25,6 +25,13 @@ public static class MathHelpers
     public static int ManhattanDistance(this Vector2Int vector) => Mathf.Abs(vector.x) + Mathf.Abs(vector.y);
 
     /// <summary>
+    /// Chebyshev distance (largest distance along any axis)
+    /// </summary>
+    /// <param name="vector">Vector to measure</param>
+    /// <returns>The distance</returns>
+    public static int ChebyshevDistance(this Vector2Int vector) => Mathf.Max(Mathf.Abs(vector.x), Mathf.Abs(vector.y));
+
+    /// <summary>
     /// Random anchor for inset such that inset fits inside container
     /// </summary>
     /// <param name="container">Size of container grid</param>
@@ -81,6 +88,7 @@ public static class MathHelpers
     public static bool IsUnit(this Vector2Int vector) => 
         vector.y == 0 && Mathf.Abs(vector.x) == 1 
         || vector.x == 0 && Mathf.Abs(vector.y) == 1;
+
     
     /// <summary>
     /// Returns all coordinates of a shape that are included in the rings
