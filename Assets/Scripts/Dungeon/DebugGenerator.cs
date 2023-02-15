@@ -4,6 +4,7 @@ using UnityEngine;
 
 public enum BlockType { Room = 1, Hall = 2 };
 
+[RequireComponent(typeof(DungeonDesignerController))]
 public class DebugGenerator : MonoBehaviour
 {
     [SerializeField] RoomBlockGenerator roomGenerator;
@@ -12,12 +13,9 @@ public class DebugGenerator : MonoBehaviour
     [SerializeField] BlockType blockType = BlockType.Hall;
 
     [SerializeField, Range(0, 1)] float fillScale = 0.95f;
-    [SerializeField, Range(0, 1)] float rotationTickDuration = 1;
 
     DungeonBlock block;
-
-    float lastRotation = -1;
-
+  
     private IBlockGenerator generator {
         get {  
         
@@ -33,27 +31,61 @@ public class DebugGenerator : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            block = generator.Generate();
-        } else if (block != null && (Time.timeSinceLevelLoad - lastRotation) > rotationTickDuration)
-        {
-            var scroll = -Input.mouseScrollDelta.x;
-            float threshold = 0.1f;
+        GetComponent<DungeonDesignerController>().OnAction += HandleDesignEvents;
+    }
 
-            if (scroll < -threshold)
-            {
-                block.Orientation = block.Orientation.RotateCW();
-                lastRotation = Time.timeSinceLevelLoad;
-            } else if (scroll > threshold)
-            {
-                block.Orientation = block.Orientation.RotateCCW();                
-                lastRotation = Time.timeSinceLevelLoad;
-            }
+    private void OnDisable()
+    {
+        GetComponent<DungeonDesignerController>().OnAction -= HandleDesignEvents;
+    }
+
+    private void HandleDesignEvents(DungeonDesignEventType eventType)
+    {
+        switch (eventType)
+        {
+            case DungeonDesignEventType.SpawnTile:
+                block = generator.Generate();
+                return;
+            case DungeonDesignEventType.RotateCW:
+                if (block != null)
+                {
+                    block.Orientation = block.Orientation.RotateCW();
+                }
+                return;
+            case DungeonDesignEventType.RoteateCCW:
+                if (block != null)
+                {
+                    block.Orientation = block.Orientation.RotateCCW();
+                }
+                return;
+
+            case DungeonDesignEventType.MoveNorth:
+                if (block != null)
+                {
+                    block.Anchor += Vector2Int.up;
+                }
+                return;
+            case DungeonDesignEventType.MoveSouth:
+                if (block != null)
+                {
+                    block.Anchor += Vector2Int.down;
+                }
+                return;
+            case DungeonDesignEventType.MoveWest:
+                if (block != null)
+                {
+                    block.Anchor += Vector2Int.left;
+                }
+                return;
+            case DungeonDesignEventType.MoveEast:
+                if (block != null)
+                {
+                    block.Anchor += Vector2Int.right;
+                }
+                return;
         }
-
     }
 
     [SerializeField]
@@ -98,7 +130,7 @@ public class DebugGenerator : MonoBehaviour
         // Outline shape of block
         Gizmos.color = ValueToColor(BlockTileTypes.Nothing);        
         var blockShape = block.DungeonShape;
-        Gizmos.DrawCube(origin, new Vector3(blockShape.x, blockShape.y));
+        Gizmos.DrawCube(new Vector3(origin.x + block.Anchor.x, origin.y + block.Anchor.y, origin.z), new Vector3(blockShape.x, blockShape.y));
 
         // Draw features
         var positions = block.FilledDungeonPositions().ToArray();

@@ -176,7 +176,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 20
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -217,6 +217,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1954189876}
   - component: {fileID: 1954189875}
+  - component: {fileID: 1954189877}
   m_Layer: 0
   m_Name: Dungeon
   m_TagString: Untagged
@@ -254,7 +255,6 @@ MonoBehaviour:
     erosionThreshold: 3
   blockType: 2
   fillScale: 0.95
-  rotationTickDuration: 1
   colorHall:
     serializedVersion: 2
     rgba: 4282338667
@@ -285,3 +285,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1954189877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954189874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b489766163f96e4dad9143f1c80680d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveTickSpeed: 0.5
+  noMoveThreshold: 0.1
+  rotateTickSpeed: 0.5
