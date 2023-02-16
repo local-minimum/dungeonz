@@ -83,8 +83,8 @@ public class DungeonBlock
             return new RectInt(
                 Mathf.Min(nw.x, se.x), 
                 Mathf.Min(nw.y, se.y), 
-                Mathf.Abs(nw.x - se.x), 
-                Mathf.Abs(nw.y - se.y)
+                Mathf.Abs(nw.x - se.x) + 1, 
+                Mathf.Abs(nw.y - se.y) + 1
             );
         }
     }
@@ -96,6 +96,7 @@ public class DungeonBlock
     /// <returns>If overlapping</returns>
     public bool Intersects(DungeonBlock other)
     {
+        Debug.Log(DungeonExtent);
         return DungeonExtent.Overlaps(other.DungeonExtent);
     }
 

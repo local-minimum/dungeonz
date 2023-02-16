@@ -2,19 +2,19 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public enum BlockType { Room = 1, Hall = 2 };
+public enum BlockType { Room = 1, Hall = 2, Random = 3 };
 
 [RequireComponent(typeof(DungeonDesignerController))]
 public class DebugGenerator : MonoBehaviour
 {
     [SerializeField] RoomBlockGenerator roomGenerator;
     [SerializeField] HallBlockGenerator hallGenerator;
-
-    [SerializeField] BlockType blockType = BlockType.Hall;
+    [SerializeField] DungeonLevel level;
+    
+    [SerializeField] BlockType blockType = BlockType.Random;
 
     [SerializeField, Range(0, 1)] float fillScale = 0.95f;
-
-    DungeonBlock block;
+    [SerializeField, Range(0, 4)] float hallToRoomRatio = 1.5f;
   
     private IBlockGenerator generator {
         get {  
@@ -25,6 +25,8 @@ public class DebugGenerator : MonoBehaviour
                     return roomGenerator;
                 case BlockType.Hall:
                     return hallGenerator;
+                case BlockType.Random:
+                    return Random.value * (1 + hallToRoomRatio) < hallToRoomRatio ? hallGenerator : roomGenerator;
                 default:
                     throw new System.ArgumentException($"Unknown block type {blockType}");
             }
@@ -45,44 +47,63 @@ public class DebugGenerator : MonoBehaviour
     {
         switch (eventType)
         {
+            // Spawn & Place & Discard
             case DungeonDesignEventType.SpawnTile:
-                block = generator.Generate();
-                return;
-            case DungeonDesignEventType.RotateCW:
-                if (block != null)
+                if (!level.HasTentative)
                 {
-                    block.Orientation = block.Orientation.RotateCW();
+                    level.SetTentativeBlock(generator.Generate());
                 }
                 return;
-            case DungeonDesignEventType.RoteateCCW:
-                if (block != null)
+            case DungeonDesignEventType.PlaceTile:
+                if (level.MayPlaceTentativeBlock)
                 {
-                    block.Orientation = block.Orientation.RotateCCW();
+                    level.PlaceBlock();
+                }
+                return;
+            case DungeonDesignEventType.DiscardTile:
+                if (level.HasTentative)
+                {
+                    level.ClearTentativeBlock();
                 }
                 return;
 
-            case DungeonDesignEventType.MoveNorth:
-                if (block != null)
+            // Rotate
+            case DungeonDesignEventType.RotateCW:
+                if (level.HasTentative)
                 {
-                    block.Anchor += Vector2Int.up;
+                    level.TentativeBlock.Orientation = level.TentativeBlock.Orientation.RotateCW();
+                }
+                return;
+            case DungeonDesignEventType.RoteateCCW:
+                if (level.HasTentative)
+                {
+                    level.TentativeBlock.Orientation = level.TentativeBlock.Orientation.RotateCCW();
+                }
+                return;
+
+            // Move
+            case DungeonDesignEventType.MoveNorth:
+                if (level.HasTentative)
+                {
+                    level.TentativeBlock.Anchor += Vector2Int.up;
                 }
                 return;
             case DungeonDesignEventType.MoveSouth:
-                if (block != null)
+                if (level.HasTentative)
                 {
-                    block.Anchor += Vector2Int.down;
+                    level.TentativeBlock.Anchor += Vector2Int.down;
                 }
                 return;
             case DungeonDesignEventType.MoveWest:
-                if (block != null)
+                if (level.HasTentative)
                 {
-                    block.Anchor += Vector2Int.left;
+                    level.TentativeBlock.Anchor += Vector2Int.left;
                 }
                 return;
             case DungeonDesignEventType.MoveEast:
-                if (block != null)
+                if (level.HasTentative)
                 {
-                    block.Anchor += Vector2Int.right;
+                    level.TentativeBlock.Anchor += Vector2Int.right;
                 }
                 return;
         }
@@ -118,8 +139,8 @@ public class DebugGenerator : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
+    void DrawBlock(DungeonBlock block, bool showTileShape = false)
+    {        
         if (block == null) return;
 
         // Constants
@@ -128,20 +149,30 @@ public class DebugGenerator : MonoBehaviour
         Vector3 scaleOffset = (new Vector3(1, 1, 0) - shape) * 0.5f;
 
         // Outline shape of block
-        Gizmos.color = ValueToColor(BlockTileTypes.Nothing);        
-        var blockShape = block.DungeonShape;
-        Gizmos.DrawCube(new Vector3(origin.x + block.Anchor.x, origin.y + block.Anchor.y, origin.z), new Vector3(blockShape.x, blockShape.y));
+        if (showTileShape)
+        {
+            Gizmos.color = ValueToColor(BlockTileTypes.Nothing);
+            var blockShape = block.DungeonShape;
+            Gizmos.DrawCube(new Vector3(origin.x + block.Anchor.x, origin.y + block.Anchor.y, origin.z), new Vector3(blockShape.x, blockShape.y));
+        }
 
         // Draw features
         var positions = block.FilledDungeonPositions().ToArray();
-        for (int i = 0; i< positions.Length; i++)
+        for (int i = 0; i < positions.Length; i++)
         {
             var position = positions[i];
 
             Vector3 pos = new Vector3(origin.x + position.Key.x, origin.y + position.Key.y, origin.z) + scaleOffset;
 
-            Gizmos.color = ValueToColor((BlockTileTypes) position.Value);
+            Gizmos.color = ValueToColor((BlockTileTypes)position.Value);
             Gizmos.DrawCube(pos, shape);
         }
+
+    }
+
+    private void OnDrawGizmos()
+    {
+        level.Blocks.ToList().ForEach(block => DrawBlock(block));
+        DrawBlock(level.TentativeBlock, true);
     }
 }

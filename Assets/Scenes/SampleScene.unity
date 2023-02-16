@@ -253,8 +253,11 @@ MonoBehaviour:
     digElseTurnTowardsProbability: 0.9
     digInitialDirectionProbability: 0.8
     erosionThreshold: 3
-  blockType: 2
+  level:
+    blocks: []
+  blockType: 3
   fillScale: 0.95
+  hallToRoomRatio: 1.5
   colorHall:
     serializedVersion: 2
     rgba: 4282338667
@@ -297,6 +300,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b489766163f96e4dad9143f1c80680d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveTickSpeed: 0.5
+  moveTickSpeed: 0.15
   noMoveThreshold: 0.1
   rotateTickSpeed: 0.5
