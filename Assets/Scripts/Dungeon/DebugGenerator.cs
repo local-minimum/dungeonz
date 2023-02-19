@@ -48,17 +48,23 @@ public class DebugGenerator : MonoBehaviour
         switch (eventType)
         {
             // Spawn & Place & Discard
+            case DungeonDesignEventType.SpawnPlaceTile:
+                if (level.HasTentative)
+                {
+                    level.PlaceBlock();
+                } else
+                {
+                    level.SetTentativeBlock(generator.Generate());
+                }
+                return;
             case DungeonDesignEventType.SpawnTile:
                 if (!level.HasTentative)
                 {
                     level.SetTentativeBlock(generator.Generate());
                 }
                 return;
-            case DungeonDesignEventType.PlaceTile:
-                if (level.MayPlaceTentativeBlock)
-                {
-                    level.PlaceBlock();
-                }
+            case DungeonDesignEventType.PlaceTile:                
+                level.PlaceBlock();                
                 return;
             case DungeonDesignEventType.DiscardTile:
                 if (level.HasTentative)
@@ -157,7 +163,7 @@ public class DebugGenerator : MonoBehaviour
         }
 
         // Draw features
-        var positions = block.FilledDungeonPositions().ToArray();
+        var positions = block.DungeonPositions().ToArray();
         for (int i = 0; i < positions.Length; i++)
         {
             var position = positions[i];
@@ -173,6 +179,6 @@ public class DebugGenerator : MonoBehaviour
     private void OnDrawGizmos()
     {
         level.Blocks.ToList().ForEach(block => DrawBlock(block));
-        DrawBlock(level.TentativeBlock, true);
+        if (level.HasTentative) DrawBlock(level.TentativeBlock, true);
     }
 }

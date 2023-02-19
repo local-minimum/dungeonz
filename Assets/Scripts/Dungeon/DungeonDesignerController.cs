@@ -7,6 +7,7 @@ public enum DungeonDesignEventType
 {
     SpawnTile,
     DiscardTile,
+    SpawnPlaceTile,
     PlaceTile,
     MoveNorth,
     MoveWest,
@@ -29,6 +30,9 @@ public class DungeonDesignerController : MonoBehaviour
 
     [SerializeField, Range(0, 2)]
     float rotateTickSpeed = 0.5f;
+
+    [SerializeField]
+    bool useSpawnPlace = false;
 
     float lastRotate;
 
@@ -94,11 +98,17 @@ public class DungeonDesignerController : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.R)) {
+        if (!useSpawnPlace && Input.GetKeyDown(KeyCode.R)) {
             OnAction(DungeonDesignEventType.SpawnTile);
         } else if (Input.GetKeyDown(KeyCode.Space))
         {
-            OnAction(DungeonDesignEventType.PlaceTile);
+            if (useSpawnPlace)
+            {
+                OnAction(DungeonDesignEventType.SpawnPlaceTile);
+            } else
+            {
+                OnAction(DungeonDesignEventType.PlaceTile);
+            }
         } else if (Input.GetKeyDown(KeyCode.Escape))
         {
             OnAction(DungeonDesignEventType.DiscardTile);

@@ -255,6 +255,7 @@ MonoBehaviour:
     erosionThreshold: 3
   level:
     blocks: []
+    connectors: []
   blockType: 3
   fillScale: 0.95
   hallToRoomRatio: 1.5
@@ -303,3 +304,4 @@ MonoBehaviour:
   moveTickSpeed: 0.15
   noMoveThreshold: 0.1
   rotateTickSpeed: 0.5
+  useSpawnPlace: 1

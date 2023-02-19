@@ -70,7 +70,11 @@ public class DungeonBlock
     /// <returns></returns>
     public Vector2Int BlockCoordinatesToDungeon(Vector2Int coordinates) => 
         Orientation.RotateVector(coordinates - Pivot) + Anchor;
+
     
+    public Vector2Int DungeonToBlockCoordinates(Vector2Int coordinates) =>
+        Orientation.RotateVector(coordinates - Anchor) + Pivot;
+
     /// <summary>
     /// The extent given the current rotation in dungeon coordinates
     /// </summary>
@@ -95,8 +99,7 @@ public class DungeonBlock
     /// <param name="other">The other block</param>
     /// <returns>If overlapping</returns>
     public bool Intersects(DungeonBlock other)
-    {
-        Debug.Log(DungeonExtent);
+    {        
         return DungeonExtent.Overlaps(other.DungeonExtent);
     }
 
@@ -104,22 +107,23 @@ public class DungeonBlock
     /// Get all filled positions as dungeon coordinates
     /// </summary>
     /// <returns>Enumerable of coordinates and their values</returns>
-    public IEnumerable<KeyValuePair<Vector2Int, int>> FilledDungeonPositions()
+    public IEnumerable<KeyValuePair<Vector2Int, int>> DungeonPositions(System.Func<int, bool> predicate = null)
     {
-        for (int y = 0; y<Shape.y; y++)
-        {
-            for (int x = 0; x<Shape.x; x++)
-            {
-                int value = _data[y, x];
-                if (value != (int)BlockTileTypes.Nothing)
-                {
-                    yield return new KeyValuePair<Vector2Int, int>(
-                        BlockCoordinatesToDungeon(new Vector2Int(x, y)),
-                        value
-                    );
-                }
-            }
-        }
+        return _data
+            .GetAll(predicate)
+            .Select(internalCoordinates => new KeyValuePair<Vector2Int, int>(
+                BlockCoordinatesToDungeon(internalCoordinates), 
+                _data[internalCoordinates.y, internalCoordinates.x]
+            ));
+    }
+
+    public int GetValue(Vector2Int dungeonCoordinates)
+    {
+        if (!DungeonExtent.Contains(dungeonCoordinates)) return (int)BlockTileTypes.Nothing;
+        
+        var coordinates = DungeonToBlockCoordinates(dungeonCoordinates);
+        Debug.Log($"{this}: {dungeonCoordinates} => {coordinates}");
+        return _data[coordinates.y, coordinates.x];
     }
 
     /// <summary>
@@ -127,8 +131,9 @@ public class DungeonBlock
     /// </summary>
     /// <param name="other">The other block</param>
     /// <param name="positions">Dungeon grid coordinates for collisions</param>
+    /// <param name="predicate">Coordinates value inclusion condition</param>
     /// <returns>If colliding</returns>
-    public bool CollidesWith(DungeonBlock other, out IEnumerable<Vector2Int> positions)
+    public bool CollidesWith(DungeonBlock other, out IEnumerable<Vector2Int> positions, System.Func<int, bool> predicate = null)
     {
         if (!Intersects(other))
         {
@@ -138,12 +143,12 @@ public class DungeonBlock
 
         var tmp = new List<Vector2Int>();
 
-        var myPositions = FilledDungeonPositions()
+        var myPositions = DungeonPositions(predicate)
             .Select(kvp => kvp.Key)
             .ToArray();
 
         var collidingPositions = other
-            .FilledDungeonPositions()
+            .DungeonPositions(predicate)
             .Where(kvp => myPositions.Contains(kvp.Key))
             .Select(kvp => kvp.Key)
             .ToArray();
