@@ -67,3 +67,21 @@ Sometimes dungeons hurt, and then you need someone to care for you
 
 Others really wonder why they go about painting and hanging drapes in the dungeon. But they say it's important.
 Monsters don't like beauty, and so they make everyone else safer. Or so they say.
+
+# Idea for evolution of characters
+
+There are basic traits.
+
+There are events where there are actions that can be selected by the character based on their current traits
+
+There are outcomes of events
+ - Experiences (bad outcome vs good outcome) to traits used
+ - Loot (used to progress and hire more characters)
+ - Condition (negative effect)
+ - Health (fight etc. may cause loss of life)
+ - Food (need to eat?)
+
+Roles like those listed above have requirements per trait when 
+- one can take the person out of action
+- if one has the resources 
+- level up or switch / claim a role (only one per character)
